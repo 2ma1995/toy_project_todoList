@@ -23,8 +23,18 @@ public class Main {
             switch (input) {
                 case "1":
                     System.out.print("할일을 입력하세요: ");
-                    String task = sc.nextLine();
-                    manager.addTask(task);
+                    String desc = sc.nextLine();
+                    System.out.print("우선순위를 입력하세요 (HIGH / MEDIUM / LOW): ");
+                    String priorityStr = sc.nextLine().toUpperCase();
+
+                    try{
+                        Priority priority = Priority.valueOf(priorityStr);
+                        manager.addTask(desc, priority);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("잘못된 우선운위 입니다. 기본값 MEDIUM으로 설정합니다.");
+                        manager.addTask(desc, Priority.MEDIUM);
+                    }
+
                     break;
                 case "2":
                     manager.printTasks();

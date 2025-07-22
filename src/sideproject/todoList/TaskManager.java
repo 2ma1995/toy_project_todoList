@@ -8,8 +8,8 @@ public class TaskManager {
     private List<Task> taskList = new ArrayList<>();
     private final String FILE_NAME = "tasks.txt";
 //    생성
-    public void addTask(String description){
-        Task task = new Task(description);
+    public void addTask(String description,Priority priority){
+        Task task = new Task(description,priority);
         taskList.add(task);
     }
 //    모든 할일 출력
@@ -44,7 +44,8 @@ public class TaskManager {
     public void saveTasksToFile(){
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
             for (Task task : taskList){
-                writer.write(task.toString());
+                String line = (task.isDone()? "[x]":"[]")+","+task.getDescription()+","+task.getPriority();
+                writer.write(line);
                 writer.newLine();
             }
             System.out.println("목록이 저장되었습니다.");
@@ -58,10 +59,14 @@ public class TaskManager {
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                boolean isDone = line.startsWith("[x]");
-                String description = line.substring(3).trim(); // [ ] 또는 [x] 이후 텍스트
+                String[] parts = line.split(",", 3);
+                if (parts.length < 3) continue;
 
-                Task task = new Task(description);
+                boolean isDone = parts[0].equals("[x]");
+                String description = parts[1].trim();
+                Priority priority = Priority.valueOf(parts[2].trim());
+
+                Task task = new Task(description,priority);
                 if (isDone) {
                     task.markDone();
                 }
@@ -70,6 +75,8 @@ public class TaskManager {
             System.out.println("할 일 목록을 불러왔습니다.");
         } catch (IOException e) {
             System.out.println("불러올 파일이 없거나 오류가 발생했습니다: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("파일에 잘못된 우선순위 값이 있습니다: "+ e.getMessage());
         }
     }
 
